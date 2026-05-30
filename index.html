@@ -1,129 +1,804 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Strategy Game Results</title>
-        <style>
-        body {
-            font-family: Arial, sans-serif;
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTT挑战赛计算器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #F5F3F0;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #EAE7E2;
+            --color-primary: #8B9A8E;
+            --color-primary-dark: #6B7A6E;
+            --color-secondary: #B8A99A;
+            --color-accent: #A67C5B;
+            --color-accent-light: #C9A88E;
+            --color-text: #5A5A5A;
+            --color-text-light: #8A8A8A;
+            --color-border: #D4D0C8;
+            --color-success: #8B9A8E;
+            --color-warning: #C9A88E;
+            --color-error: #B87E6B;
+            --shadow-sm: 0 2px 8px rgba(90, 90, 90, 0.08);
+            --shadow-md: 0 4px 16px rgba(90, 90, 90, 0.12);
+            --shadow-lg: 0 8px 32px rgba(90, 90, 90, 0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f4f4f9;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            border-radius: 5px;
-            width: 100%;
-            max-width: 600px;
-        }
-        input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
             box-sizing: border-box;
         }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
+            min-height: 100vh;
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            color: var(--color-text-light);
+            font-size: 0.95rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--color-primary);
+            border-radius: 2px;
+        }
+
+        .guide-section {
+            margin-bottom: 24px;
+        }
+
+        .guide-section h3 {
+            font-size: 1rem;
+            color: var(--color-accent);
+            margin-bottom: 12px;
+        }
+
+        .guide-list {
+            list-style: none;
+            counter-reset: guide-counter;
+        }
+
+        .guide-list li {
+            counter-increment: guide-counter;
+            padding: 10px 12px 10px 40px;
+            position: relative;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .guide-list li:hover {
+            background: var(--color-primary);
             color: white;
-            border: none;
-            border-radius: 5px;
+        }
+
+        .guide-list li::before {
+            content: counter(guide-counter);
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .guide-list li:hover::before {
+            background: white;
+            color: var(--color-primary);
+        }
+
+        .guide-note {
+            background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-accent-light) 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            margin-top: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .target-toggle {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 2px solid var(--color-border);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
             cursor: pointer;
+            transition: var(--transition);
+            color: var(--color-text);
+            outline: none;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .toggle-btn:hover {
+            border-color: var(--color-primary);
         }
-        table {
+
+        .toggle-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        .calculated-target {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+        }
+
+        .calculated-target strong {
+            color: var(--color-primary);
+            font-size: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .form-label .hint {
+            font-weight: 400;
+            color: var(--color-text-light);
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--color-text);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-input:hover {
+            border-color: var(--color-secondary);
+        }
+
+        .form-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(139, 154, 142, 0.2);
+        }
+
+        .form-input.error {
+            border-color: var(--color-error);
+            background: rgba(184, 126, 107, 0.05);
+        }
+
+        .form-input.success {
+            border-color: var(--color-success);
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .results-section {
+            margin-top: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1px solid var(--color-border);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--color-text-light);
+        }
+
+        .chart-container {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 24px;
+            position: relative;
+            height: 300px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
+        .data-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85rem;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+
+        .data-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 12px 16px;
             text-align: left;
+            font-weight: 500;
+            white-space: nowrap;
         }
-        th {
-            background-color: #007bff;
+
+        .data-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .operation-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-challenge {
+            background: rgba(139, 154, 142, 0.2);
+            color: var(--color-primary-dark);
+        }
+
+        .badge-stamina {
+            background: rgba(166, 124, 91, 0.2);
+            color: var(--color-accent);
+        }
+
+        .badge-game {
+            background: rgba(184, 169, 154, 0.2);
+            color: var(--color-secondary);
+        }
+
+        .badge-reset {
+            background: rgba(138, 138, 138, 0.2);
+            color: var(--color-text-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--color-text-light);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 24px;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border: 2px solid var(--color-border);
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--color-text);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--color-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
             color: white;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
         }
-        #error {
-            color: red;
-            margin-top: 10px;
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-light);
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-text);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
     </style>
-    </head>
-    <body>
-        <div class="container">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
             <h1>VTT挑战赛计算器</h1>
-            <div>
-                <style>
-                    body {
-                      font-family: Arial, sans-serif;
-                      line-height: 1.6;
-                      color: #333;
-                    }
-                    .guide-container {
-                      max-width: 800px;
-                      margin: 50px auto;
-                      padding: 20px;
-                      background-color: #f9fafb;
-                      border: 1px solid #ccc;
-                      border-radius: 5px;
-                    }
-                    h1 {
-                      text-align: center;
-                      margin-bottom: 20px;
-                    }
-                    ol {
-                      padding-left: 20px;
-                    }
-                    li {
-                      margin-bottom: 10px;
-                    }
-                  </style>
-            </head>
-            <body>
+            <p>精准计算您的挑战赛收益与时间规划</p>
+        </header>
 
-                <div class="guide-container">
-                    <h1>如何刷挑战赛？</h1>
-                    <ol>
-                        <li>准备两个设备和一个额外的账号。</li>
-                        <li>等待匹配（这可能会很久）。</li>
-                        <li>都开启挑战赛后对战，赢一分后额外账号立刻退出。</li>
-                        <li>销毁账号，重复以上步骤。</li>
-                        <p>这样下来，一轮挑战赛大约需要30分钟，实际用时依据此来计算。</p>
-                    </ol>
-                </div>
-                <p>值得注意的是,这个计算器并没有仔细考虑体力,<del>我想应该也没有多少人不等体力补满就去刷挑战赛吧</del></p>
+        <main class="main-content">
+            <div class="left-panel">
+                <section class="card guide-section">
+                    <h2 class="card-title">挑战赛攻略</h2>
+                    <ul class="guide-list">
+                        <li>准备两个设备和一个额外的账号</li>
+                        <li>等待匹配（可能需要较长时间）</li>
+                        <li>双方开启挑战赛后对战，赢一分后额外账号立刻退出</li>
+                        <li>销毁账号，重复以上步骤</li>
+                    </ul>
+                    <div class="guide-note">
+                        一轮挑战赛约需30分钟，实际用时据此计算。本计算器未详细考虑体力因素，建议体力补满后再刷挑战赛。
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2 class="card-title">参数设置</h2>
+                    <form id="calculatorForm" novalidate>
+                        <div class="form-group">
+                            <label class="form-label" for="currentGold">
+                                当前金币
+                                <span class="hint">(当前拥有的金币数量)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="number" 
+                                    id="currentGold" 
+                                    class="form-input" 
+                                    value="2124" 
+                                    min="0" 
+                                    max="999999"
+                                    placeholder="请输入当前金币"
+                                    required
+                                >
+                            </div>
+                            <div class="error-message" id="currentGoldError">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                <span></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                目标设置
+                                <span class="hint">(选择目标类型)</span>
+                            </label>
+                            <div class="target-toggle">
+                                <button type="button" class="toggle-btn active" id="toggleTargetGold" data-mode="target">
+                                    目标金币
+                                </button>
+                                <button type="button" class="toggle-btn" id="toggleIncreaseGold" data-mode="increase">
+                                    目标增加金币数
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="targetGoldGroup">
+                            <label class="form-label" for="targetGold">
+                                目标金币
+                                <span class="hint">(想要达到的金币总数)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="number" 
+                                    id="targetGold" 
+                                    class="form-input" 
+                                    value="6800" 
+                                    min="1" 
+                                    max="999999"
+                                    placeholder="请输入目标金币"
+                                    required
+                                >
+                            </div>
+                            <div class="error-message" id="targetGoldError">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                <span></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="increaseGoldGroup" style="display: none;">
+                            <label class="form-label" for="increaseGold">
+                                目标增加金币数
+                                <span class="hint">(想要额外获得的金币数量)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="number" 
+                                    id="increaseGold" 
+                                    class="form-input" 
+                                    value="4676" 
+                                    min="1" 
+                                    max="999999"
+                                    placeholder="请输入想要增加的金币数"
+                                >
+                            </div>
+                            <div class="error-message" id="increaseGoldError">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                <span></span>
+                            </div>
+                            <div class="calculated-target" id="calculatedTarget" style="display: none;">
+                                <span class="hint">实际目标金币: <strong id="actualTargetGold">6800</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="stamina">
+                                当前体力
+                                <span class="hint">(每轮挑战赛消耗20体力)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="number" 
+                                    id="stamina" 
+                                    class="form-input" 
+                                    value="20" 
+                                    min="0" 
+                                    max="999"
+                                    placeholder="请输入当前体力"
+                                    required
+                                >
+                            </div>
+                            <div class="error-message" id="staminaError">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                <span></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="calculateBtn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                            开始计算
+                        </button>
+                    </form>
+
+                    <div class="progress-bar" id="progressBar" style="display: none;">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-label" id="progressLabel" style="display: none;">
+                        <span id="progressCurrent">0</span>
+                        <span id="progressTarget">6800</span>
+                    </div>
+                </section>
             </div>
-            <form id="inputForm">
-                <label for="currentGold">当前金币:</label>
-                <input type="number" id="currentGold" value="2124" required>
-                <br>
-                <label for="targetGold">目标金币:</label>
-                <input type="number" id="targetGold" value="6800" required>
-                <br>
-                <label for="stamina">体力:</label>
-                <input type="number" id="stamina" value="20" required>
-                <br>
-                <button type="button" onclick="calculate()">计算</button>
-                <div id="error"></div>
-            </form>
-            <div id="results"></div>
-        </div>
-        <script src="strategy.js"></script>
-    </body>
+
+            <div class="right-panel">
+                <section class="card results-section">
+                    <h2 class="card-title">计算结果</h2>
+                    
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <span>计算中...</span>
+                    </div>
+
+                    <div id="resultsContent">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                            <p>请输入参数并点击计算按钮</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="strategy.js"></script>
+</body>
 </html>
